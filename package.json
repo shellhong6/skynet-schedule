@@ -1,0 +1,31 @@
+{
+  "name": "monitor-schedule",
+  "version": "1.0.0",
+  "description": "monitoring schedule by node.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "hongguangjie",
+  "license": "ISC",
+  "dependencies": {
+    "@flyme/skynet-db": "^1.5.0",
+    "@flyme/skynet-utils": "^1.0.4",
+    "async": "^2.0.1",
+    "chart.js": "^2.3.0",
+    "cookie": "^0.3.1",
+    "emailjs": "^1.0.10",
+    "good": "^7.0.1",
+    "good-console": "^6.1.2",
+    "good-squeeze": "^4.0.0",
+    "hapi": "^14.2.0",
+    "inert": "^4.0.2",
+    "md5": "^2.2.1",
+    "mongodb": "^2.2.15",
+    "mongoose": "^4.5.9",
+    "node-schedule": "^1.1.1",
+    "rotating-file-stream": "^1.0.5",
+    "uglify-js": "^2.7.5"
+  },
+  "devDependencies": {}
+}

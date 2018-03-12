@@ -1,0 +1,8 @@
+{
+  "script":"/data/node/node-server/monitor-schedule/start.js",
+  "error_file":"/data/logs/node/monitor-schedule-err.log",
+  "out_file":"/data/logs/node/monitor-schedule-out.log",
+  "merge_logs":false,
+  "log_date_format":"YYYY-MM-DD HH:mm:ss",
+  "name": "monitor-schedule"
+}
