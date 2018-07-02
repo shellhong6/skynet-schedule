@@ -2,7 +2,7 @@ const LogUtil = require('@flyme/skynet-utils/lib/logUtil.js');
 const Service = require('@flyme/skynet-db');
 const Async = require('async');
 
-Service.setOptions('occasional');
+
 
 const ERROR_ITEM_AMOUNT = 100;
 const ANDROID_ERROR_ITEM_AMOUNT = 0;
@@ -275,8 +275,10 @@ var EmailDeal = {
           });
         }
       }
-      html.push(errorList ? this.androidListToHtml(errorList) : '');
-      html.push(this.emptyToHtml());
+      if(errorList && errorList.length){
+        html.push(this.androidListToHtml(errorList));
+        html.push(this.emptyToHtml());
+      }
     });
     if(html && html.length){
       html = this.getPrefixAndroidHtml() + html.join('') + this.getEndHtml();

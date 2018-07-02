@@ -9,7 +9,7 @@ var Service = require('@flyme/skynet-db')
 var LogUtil = require('@flyme/skynet-utils/lib/logUtil.js');
 var Async = require('async');
 
-Service.setOptions('occasional');
+
 
 class TimingDeal{
   constructor(){
@@ -38,7 +38,6 @@ class TimingDeal{
     });
   }
   doClear(project, type, callback){
-    this.closeDb(project);
     callback && callback(this[`${type}-count`]);
   }
   finishDeal(project, type, callback, emailDeal){
@@ -69,7 +68,6 @@ class TimingDeal{
           }, () => {
             LogUtil.log('manage-projects(', project, ')：set slowTimingAmount to', this['slow-timing-count']);
           }, function(){
-            Service.closeConnection('manage-projects', '');
           });
         }
         this.doClear(project, type, callback);
@@ -103,13 +101,6 @@ class TimingDeal{
       });
     };
   }
-  closeDb(project){
-    Service.closeConnectionPreDay('timing', project);
-    Service.closeConnection('job-pv', project);
-    Service.closeConnection('job-all-page', '');
-    Service.closeConnection('job-timing', project);
-    Service.closeConnection('slow-timing', project);
-  }
   startDeal(doc, project, type){
     this['daily-timing-count']++;
     var key = `${doc._page}-${new Date(doc._reportServerTime).getHours()}`,
@@ -126,6 +117,15 @@ class TimingDeal{
     _doc.other = other;
     this.recordSlow(_doc, project);
     if(rs == undefined || net == undefined || load == undefined || other == undefined){
+      LogUtil.error(`undefined error: ${rs}, ${net}, ${load}, ${other}`);
+      return;
+    }
+    if(rs < 0 || net < 0 || load < 0 || other < 0){
+      LogUtil.error(`negative error: ${rs}, ${net}, ${load}, ${other}`);
+      return;
+    }
+    if(rs > 30000 || net > 30000 || load > 30000 || other > 30000){
+      LogUtil.error(`max error: ${rs}, ${net}, ${load}, ${other}`);
       return;
     }
     if(!map[key]){

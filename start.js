@@ -16,8 +16,6 @@ const Fs = require('fs');
 const Path = require('path');
 const EmailDeal = require('./src/module/EmailDeal');
 
-Service.setOptions('occasional');
-
 const TIMEOUT = 6e5;
 
 var sweepJob = new SweepJob('config', 'log');
@@ -40,20 +38,12 @@ var dbJob = {
   },
   doDrop(project, type, callback){
     var t = TimeUtil.get2DayAgo();
-    var name = `${type}-${project}-${t.getFullYear()}${t.getMonth() + 1}${t.getDate()}`;
-    var url = Config.getDbUri(name);
-    LogUtil.log('doDrop connect url ', url);
-    Mongoose.connect(url, {
-      user: Config.user,
-      pass: Config.pass
-    },function(){
-      try{
-        LogUtil.log('begin doDrop url: ', url);
-        Mongoose.connection.db.dropDatabase();
-        Mongoose.connection.db.close();
-      }catch(e){
-        LogUtil.log('action：doDrop failed', 'url: ', url, 'time：', new Date());
-        LogUtil.log('error message：', e.message);
+    var name = `${type}${project ? '-' + project : ''}-${t.getFullYear()}${t.getMonth() + 1}${t.getDate()}`;
+    Service.dropCollection(name, function(err){
+      if(err){
+        LogUtil.log('doDrop fail, collectionName:', name, 'time：', new Date());
+      }else{
+        LogUtil.log('doDrop success, collectionName:', name, 'time：', new Date());
       }
       callback && callback();
     });
@@ -94,25 +84,11 @@ var dbJob = {
   dropDailyJSError(project, callback){
     this.doDrop(project, 'jsError', callback);
   },
+  dropDailyWarnReport(project, callback){
+    this.doDrop('', 'warnReport', callback);
+  },
   dropDailyAndroidError(callback){
-    var t = TimeUtil.get2DayAgo();
-    var name = `androidReport-${t.getFullYear()}${t.getMonth() + 1}${t.getDate()}`;
-    var url = Config.getDbUri(name);
-    LogUtil.log('doDrop connect url ', url);
-    Mongoose.connect(url, {
-      user: Config.user,
-      pass: Config.pass
-    },function(){
-      try{
-        LogUtil.log('begin doDrop url: ', url);
-        Mongoose.connection.db.dropDatabase();
-        Mongoose.connection.db.close();
-      }catch(e){
-        LogUtil.log('action：doDrop failed', 'url: ', url, 'time：', new Date());
-        LogUtil.log('error message：', e.message);
-      }
-      callback && callback();
-    });
+    this.doDrop('', 'androidReport', callback);
   },
   doJob(r, action, seriesCb){
     var name = '',
@@ -128,6 +104,13 @@ var dbJob = {
         callback && callback(null, 'androidReport');
       });
     });
+    if(action == 'drop'){
+      fns.push((callback) => {
+        this[`${action}DailyWarnReport`](function(){
+          callback && callback(null, 'warnReport');
+        });
+      });
+    }
     Async.series(
       fns,
       function(err, results){
@@ -167,12 +150,12 @@ var dbJob = {
     this.doJob(r, 'drop');
   },
   createSeriesFn(name, action, type){
-      return (callback) => {
-        LogUtil.log(`begin ${action}Daily${type}: `, name);
-        this[`${action}Daily${type}`](name, function(){
-          callback(null, type);
-        });
-      };
+    return (callback) => {
+      LogUtil.log(`begin ${action}Daily${type}: `, name);
+      this[`${action}Daily${type}`](name, function(){
+        callback(null, type);
+      });
+    };
   },
   createSeriesFns(project, action, seriesCb){
     return [

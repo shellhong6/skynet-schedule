@@ -7,7 +7,7 @@
 var Service = require('@flyme/skynet-db')
 var LogUtil = require('@flyme/skynet-utils/lib/logUtil.js');
 
-Service.setOptions('occasional');
+
 
 class MemoryDeal{
   constructor(){
@@ -15,11 +15,6 @@ class MemoryDeal{
     this['daily-memory-save'] = 0;//用于save操作计数，为了实现异步的多个save操作完成后，执行对应的操作
     this['daily-memory-count'] = 0;//用于原数据表扫描的记录数记录
     this['big-memory-count'] = 0;
-  }
-  closeDb(project){
-    Service.closeConnectionPreDay('memory', project);
-    Service.closeConnection('big-memory', project);
-    Service.closeConnection('job-memory', project);
   }
   doSave(allCompleteFn, gtype, type, project, doc){
     var _gtype = `${gtype}-save`;
@@ -32,7 +27,6 @@ class MemoryDeal{
     });
   }
   doClear(project, type, callback){
-    this.closeDb(project);
     callback && callback(this['daily-memory-count']);
   }
   recordBig(doc, project){//大缓存占用事件记录
@@ -63,7 +57,6 @@ class MemoryDeal{
           }, () => {
             LogUtil.log('manage-projects(', project ,')：set bigMemoryAmount to', this['big-memory-count']);
           }, function(){
-            Service.closeConnection('manage-projects', '');
           });
         }
         this.doClear(project, type, callback);

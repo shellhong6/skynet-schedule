@@ -5,7 +5,7 @@
 'use strict'
 var Service = require('@flyme/skynet-db')
 
-Service.setOptions('occasional');
+
 
 const LogUtil = require('@flyme/skynet-utils/lib/logUtil.js');
 class ErrorDeal{
@@ -25,12 +25,7 @@ class ErrorDeal{
     });
   }
   doClear(project, type, callback){
-    this.closeDb(project);
     callback && callback(this['job-jsError-count']);
-  }
-  closeDb(project){
-    Service.closeConnectionPreDay('jsError', project);
-    Service.closeConnection('job-jsError', project);
   }
   finishDeal(project, type, callback, emailDeal){
     var map = this[type], temp = null;
@@ -50,7 +45,6 @@ class ErrorDeal{
         }, () => {
           LogUtil.log('manage-projects(', project, ')：set errorAmount to', this[`${type}-count`]);
         }, function(){
-          Service.closeConnection('manage-projects', '');
         });
         this.doClear(project, type, callback);
       }, type, 'job-jsError', project, temp);

@@ -6,7 +6,7 @@
 var Service = require('@flyme/skynet-db')
 var LogUtil = require('@flyme/skynet-utils/lib/logUtil.js');
 
-Service.setOptions('occasional');
+
 
 class ResourcesDeal{
   constructor(){
@@ -37,13 +37,7 @@ class ResourcesDeal{
     });
   }
   doClear(project, type, callback){
-    this.closeDb(project);
     callback && callback(this['daily-resources-count']);
-  }
-  closeDb(project){
-    Service.closeConnectionPreDay('resources', project);
-    Service.closeConnection('job-resources', project);
-    Service.closeConnection('slow-resources', project);
   }
   recordSlow(doc, project){//慢事件记录
     if(doc.dur > 2000){
